@@ -150,8 +150,6 @@ public class HorseMovement : MonoBehaviour {
 			movementDescFormatted += "\n" + movementDescUnformatted[i];
 		}
 		GUI.Box (new Rect (0,0,200,100), "Movement Description:\n" + movementDescFormatted);
-		
-		GUI.Box (new Rect (Screen.width - 200,0,200,50), "Current View:\n" + gs.getCameraDesc());
 	}
 	
 	IEnumerator move(Vector3 first, Vector3 second){

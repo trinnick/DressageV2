@@ -2,7 +2,9 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\HorseMovement\HorseMovement.cs">
     <Files>
-      <File FileName="Assets\Scripts\HorseMovement\HorseMovement.cs" Line="211" Column="17" />
+      <File FileName="Assets\Scripts\HorseMovement\HorseMovement.cs" Line="152" Column="87" />
+      <File FileName="Assets\Scripts\GlobalSettings.cs" Line="119" Column="3" />
+      <File FileName="Assets\Scripts\Camera\CameraToggle.cs" Line="36" Column="54" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

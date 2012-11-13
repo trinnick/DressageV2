@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 public class CameraToggle{
@@ -12,8 +13,6 @@ public class CameraToggle{
 			GameObject.Find(gs.getCamera2()).camera.depth = 0;
 			GameObject.Find(gs.getCamera3()).camera.depth = 0;
 			GameObject.Find(gs.getCamera4()).camera.depth = 0;
-			
-			gs.setCameraDesc("3rd Persion View");
 	    }
 	
 		if (Input.GetKeyDown(KeyCode.Alpha2)){
@@ -21,8 +20,6 @@ public class CameraToggle{
 			GameObject.Find(gs.getCamera2()).camera.depth = 1;
 			GameObject.Find(gs.getCamera3()).camera.depth = 0;
 			GameObject.Find(gs.getCamera4()).camera.depth = 0;
-			
-			gs.setCameraDesc("View from Above");
 	    }
 	
 		if (Input.GetKeyDown(KeyCode.Alpha3)){
@@ -30,8 +27,6 @@ public class CameraToggle{
 			GameObject.Find(gs.getCamera2()).camera.depth = 0;
 			GameObject.Find(gs.getCamera3()).camera.depth = 1;
 			GameObject.Find(gs.getCamera4()).camera.depth = 0;
-			
-			gs.setCameraDesc("View from West Stands");
 	    }
 	
 		if (Input.GetKeyDown(KeyCode.Alpha4)){
@@ -39,8 +34,6 @@ public class CameraToggle{
 			GameObject.Find(gs.getCamera2()).camera.depth = 0;
 			GameObject.Find(gs.getCamera3()).camera.depth = 0;
 			GameObject.Find(gs.getCamera4()).camera.depth = 1;
-			
-			gs.setCameraDesc("View from East Stands");
 	    }
 	}
 }

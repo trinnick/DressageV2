@@ -5,6 +5,7 @@ using System.Collections;
 public class GlobalSettings{
 	
 	private float rateOfMovement = .3f;
+	private int levelSelect = 1;
 	private string movementID = "N/A";
 	private String[] movementDesc = new String[0];
 	private string pathDesc = "N/A";
@@ -15,11 +16,26 @@ public class GlobalSettings{
 	private string Camera3 = "CameraWestStand";
 	private string Camera4 = "CameraEastStand";
 	
-	private string CameraDesc = "View from Above";
+	private string[] file = {
+		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest2.xml"
+	};
 	
-	private static string fileAddress = "http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1.xml";
+	private static string fileAddress = "";
+	
+	public GlobalSettings(){
+		fileAddress = file[0];
+	}
 	
 	/***********************Setters and Getters******************************/
+	
+	public int getLevelSelect(){
+		return levelSelect;
+	}
+	
+	public void setLevelSelect(int selected){
+		levelSelect = selected;
+	}
 	
 	public float getRateOfMovement(){
 		return rateOfMovement;
@@ -81,8 +97,9 @@ public class GlobalSettings{
 		return fileAddress;
 	}
 	
-	public void setFileAddress(string f){
-		fileAddress = f;
+	public void setFileAddress(int i){
+		i -= 1;
+		fileAddress = file[i];
 	}
 	
 	public String[] getMovementDesc(){
@@ -99,13 +116,5 @@ public class GlobalSettings{
 	
 	public void setMovementID(string id){
 		movementID = id;
-	}
-	
-	public string getCameraDesc(){
-		return CameraDesc;
-	}
-	
-	public void setCameraDesc(string view){
-		CameraDesc = view;
 	}
 }

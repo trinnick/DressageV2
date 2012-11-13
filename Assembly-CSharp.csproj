@@ -48,6 +48,9 @@
      <Compile Include="Assets\Scripts\GlobalSettings.cs" />
      <Compile Include="Assets\Scripts\HorseMovement\HorseMovement.cs" />
      <Compile Include="Assets\Scripts\HorseMovement\Movement.cs" />
+     <Compile Include="Assets\Scripts\MainMenu\LevelSelectionScript.cs" />
+     <Compile Include="Assets\Scripts\MainMenu\MainMenuScript.cs" />
+     <Compile Include="Assets\Scripts\MainMenu\Popup.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
