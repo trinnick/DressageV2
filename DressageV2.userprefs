@@ -1,10 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\HorseMovement\HorseMovement.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GlobalSettings.cs">
     <Files>
-      <File FileName="Assets\Scripts\HorseMovement\HorseMovement.cs" Line="152" Column="87" />
-      <File FileName="Assets\Scripts\GlobalSettings.cs" Line="119" Column="3" />
-      <File FileName="Assets\Scripts\Camera\CameraToggle.cs" Line="36" Column="54" />
+      <File FileName="Assets\Scripts\HorseMovement\HorseMovement.cs" Line="326" Column="3" />
+      <File FileName="Assets\Scripts\GlobalSettings.cs" Line="20" Column="64" />
+      <File FileName="Assets\Scripts\Camera\CameraToggle.cs" Line="1" Column="1" />
+      <File FileName="slerp_circle_alternative.cs" Line="308" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

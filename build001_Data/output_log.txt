@@ -14,7 +14,7 @@ Platform assembly: C:\Users\doug\Desktop\DressageV2\build001_Data\Managed\UnityE
 Loading C:\Users\doug\Desktop\DressageV2\build001_Data\Managed\UnityEngine.dll into Unity Child Domain
 Platform assembly: C:\Users\doug\Desktop\DressageV2\build001_Data\Managed\Assembly-CSharp.dll (this message is harmless)
 Loading C:\Users\doug\Desktop\DressageV2\build001_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
-- Completed reload, in  0.056 seconds
+- Completed reload, in  0.082 seconds
 Platform assembly: C:\Users\doug\Desktop\DressageV2\build001_Data\Managed\System.Xml.dll (this message is harmless)
 Loaded following XML file: 
 <?xml version="1.0" encoding="utf-8" ?>

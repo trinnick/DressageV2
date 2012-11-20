@@ -4,7 +4,7 @@ using System.Collections;
 
 public class GlobalSettings{
 	
-	private float rateOfMovement = .3f;
+	private float rateOfMovement = 10.0f;
 	private int levelSelect = 1;
 	private string movementID = "N/A";
 	private String[] movementDesc = new String[0];

@@ -9,7 +9,9 @@ using System.Collections;
 
 public class HorseMovement : MonoBehaviour {
 	
+	//Reference to the class where all variables are stored
 	public GlobalSettings gs = new GlobalSettings();
+	//Reference to the class that allows for the toggle of the camera view
 	public CameraToggle tg = new CameraToggle();
 	
 	// Use this for initialization
@@ -121,24 +123,21 @@ public class HorseMovement : MonoBehaviour {
 		}
 		else{
 			string[] desc = movement.PathDesc.Split('_');
-			
-			float radius = 0.0f;
-			
+						
 			if(desc[0] == "HalfCircle"){
-				radius = float.Parse(desc[2])/10.0f;
-				
+				int change = 0;
 				if(desc[3] == "Down"){
-					yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,radius));
+					change = 1;
 				}
 				
 				if(desc[3] == "Up"){
-					yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,-radius));
+					change = -1;
 				}
+				yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,change, path[0], path[1], float.Parse(desc[2])));
 			}
 			else if(desc[0] == "FullCircle"){
-				radius = float.Parse(desc[2])/10.0f;
-				
-				yield return StartCoroutine(fullCircleMovement(firstPosition,radius));
+				float diameter = float.Parse(desc[2]);
+				yield return StartCoroutine(fullCircleMovement(firstPosition,diameter,path[0], desc[1]));
 			}	
 		}				
 	}
@@ -149,13 +148,13 @@ public class HorseMovement : MonoBehaviour {
 		for(int i=0;i<movementDescUnformatted.Length;i++){
 			movementDescFormatted += "\n" + movementDescUnformatted[i];
 		}
-		GUI.Box (new Rect (0,0,200,100), "Movement Description:\n" + movementDescFormatted);
+		GUI.Box (new Rect (0,0,300,100), "Movement Description:\n" + movementDescFormatted);
 	}
 	
 	IEnumerator move(Vector3 first, Vector3 second){
 	    float dist = Vector3.Distance(first, second);
 	
-	    for (float i = 0.0f; i < 1.0f; i += (gs.getRateOfMovement() * Time.deltaTime)) {
+	    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)) {
 	        transform.position = Vector3.Lerp(first, second, i);
 			yield return null;	
 			
@@ -164,50 +163,166 @@ public class HorseMovement : MonoBehaviour {
 	    }
 	}
 	
-	IEnumerator halfCircleMovement(Vector3 first, Vector3 second, float radius){
-		Vector3 center = new Vector3();
-		Vector3 change = new Vector3(radius,0.0f,0.0f);
-	    float dist = Vector3.Distance(first, second);
-	
-	    for (float i = 0.0f; i < 1.0f; i += (gs.getRateOfMovement() * Time.deltaTime)) {
-		    // The center of the arc
-		    center = (first + second)/2;
-		    // move the center a bit downwards to make the arc vertical
-		    center -= change;
+	IEnumerator halfCircleMovement(Vector3 first, Vector3 second, int change, string markerOne, string markerTwo, float diameter){
+		float distance = Vector3.Distance(first,second);
+		Vector3 radius =  new Vector3(change * distance,0.0f,0.0f)/2;
 		
-		    // Interpolate over the arc relative to center
-		    Vector3 arcFirst = first - center;
-		    Vector3 arcSecond = second - center;
-		    transform.position = Vector3.Slerp(arcFirst, arcSecond, i);
-		    transform.position += center;
+		if((markerOne == "H" && markerTwo == "K") || (markerOne == "K" && markerTwo == "H")){
+			distance = 20.0f;
+			radius =  new Vector3(0.0f,0.0f,change * distance)/2;
+		}
+		
+		Vector3 center = (first + second)/2;
+		Vector3 tempOne = first + radius;
+		Vector3 tempTwo = second + radius;
+		Vector3 midPoint = center + radius;
+	    float dist = (float)Math.PI * (distance)/2;
+	
+	    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*2) {
+	        Vector3 bp1 = Vector3.Lerp(first, tempOne, i);
+	        Vector3 bp2 = Vector3.Lerp(tempOne, midPoint, i);
+	
+	        transform.position = Vector3.Lerp(bp1, bp2, i);
 			yield return null;
 			
 			pauseMovement();
-			tg.toggle();	
+			tg.toggle();
+	    }
+	
+	    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*2) {
+	        Vector3 bp1 = Vector3.Lerp(midPoint, tempTwo, i);
+	        Vector3 bp2 = Vector3.Lerp(tempTwo, second, i);
+	
+	        transform.position = Vector3.Lerp(bp1, bp2, i);
+			yield return null;
+			
+			pauseMovement();
+			tg.toggle();
 	    }
 	}
 	
-	IEnumerator fullCircleMovement(Vector3 first, float radius){
-		Vector3 center = new Vector3();
-		//Vector3 change = new Vector3(radius,0.0f,0.0f);
-		Vector3 second = new Vector3(-radius,0.0f,0.0f);
-	
-	    for (float i = 0.0f; i < 1.0f; i += (gs.getRateOfMovement() * Time.deltaTime)) {
-		    // The center of the arc
-		    center = (first + second)/2;
-		    // move the center a bit downwards to make the arc vertical
-		    //center -= change;
+	IEnumerator fullCircleMovement(Vector3 first, float diameter, string marker, string circleDirection){
+		int circleDir = 0;
+		if(diameter == 20){
+			diameter = 18;
+		}
 		
-		    // Interpolate over the arc relative to center
-		    Vector3 arcFirst = first - center;
-		    Vector3 arcSecond = second - center;
-		    transform.position = Vector3.Slerp(arcFirst, arcSecond, i);
-		    transform.position += center;
-			yield return null;
+		if(marker == "G" || marker == "I" || marker == "X" || marker == "L" || marker == "D"){
+			diameter -= 1.0f;
+		}
+		
+		float radius = (diameter)/2;
+	    float dist = (float)Math.PI * (diameter);
+		Vector3 second = new Vector3();
+		int change = 1;
+
+		if(marker == "A"){
+			change = -1;
+			if(circleDirection == "Left"){
+				circleDir = -1;
+			}
+			else{
+				circleDir = 1;
+			}
+			second = new Vector3((change * diameter) + first.x,first.y,first.z);
+		}
+		
+		if(marker == "C"){
+			if(circleDirection == "Left"){
+				circleDir = -1;
+			}
+			else{
+				circleDir = 1;
+			}
+			second = new Vector3((change * diameter) + first.x,first.y,first.z);
+		}
 			
-			pauseMovement();
-			tg.toggle();	
-	    }
+		if(marker == "H" || marker == "S" || marker == "E" || marker == "V" || marker == "K"){
+			if(circleDirection == "Left"){
+				circleDir = 1;
+			}
+			else{
+				circleDir = -1;
+			}
+			second = new Vector3(first.x,first.y,(change * diameter) + first.z);
+		}
+			
+		if(marker == "M" || marker == "R" || marker == "B" || marker == "P" || marker == "F"){
+			change = -1;
+			if(circleDirection == "Left"){
+				circleDir = 1;
+			}
+			else{
+				circleDir = -1;
+			}
+			second = new Vector3(first.x,first.y,(change * diameter) + first.z);
+		}
+			
+		if(marker == "G" || marker == "I" || marker == "X" || marker == "L" || marker == "D"){
+			
+			if(circleDirection == "Left"){
+				circleDir = 1;
+				change = -1;
+			}
+			else{
+				circleDir = -1;
+				change = 1;
+			}
+			second = new Vector3(first.x,first.y,(change * diameter) + first.z);
+		}
+		
+		float distance = Vector3.Distance(first,second);
+		
+		radius *= change;
+		
+		for (int x = 0; x < 2; x++){
+			Vector3 tempOne = new Vector3();
+			Vector3 tempTwo = new Vector3();
+			Vector3 midPoint = new Vector3();
+			
+			if(marker == "A" || marker == "C"){
+				Vector3 center = new Vector3(radius + first.x,first.y,first.z);
+				tempOne = new Vector3(first.x,first.y,(circleDir * radius) + first.z);
+				tempTwo = new Vector3(second.x,second.y,(circleDir * radius) + second.z);
+				midPoint = new Vector3(center.x,center.y,(circleDir * radius) + center.z);
+			}
+			
+			if(marker == "H" || marker == "S" || marker == "E" || marker == "V" || marker == "K" || 
+				marker == "M" || marker == "R" || marker == "B" || marker == "P" || marker == "F" ||
+				marker == "G" || marker == "I" || marker == "X" || marker == "L" || marker == "D"){
+				Vector3 center = new Vector3(first.x,first.y,radius + first.z);
+				tempOne = new Vector3((circleDir * radius) + first.x,first.y,first.z);
+				tempTwo = new Vector3((circleDir * radius) + second.x,second.y,second.z);
+				midPoint = new Vector3((circleDir * radius) + center.x,center.y,center.z);
+			}
+		
+		    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*4) {
+		        Vector3 bp1 = Vector3.Lerp(first, tempOne, i);
+		        Vector3 bp2 = Vector3.Lerp(tempOne, midPoint, i);
+		
+		        transform.position = Vector3.Lerp(bp1, bp2, i);
+				yield return null;
+				
+				pauseMovement();
+				tg.toggle();
+		    }
+		
+		    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*4) {
+		        Vector3 bp1 = Vector3.Lerp(midPoint, tempTwo, i);
+		        Vector3 bp2 = Vector3.Lerp(tempTwo, second, i);
+		
+		        transform.position = Vector3.Lerp(bp1, bp2, i);
+				yield return null;
+				
+				pauseMovement();
+				tg.toggle();
+		    }
+			
+			radius *= -1;
+			Vector3 reversal = first;
+			first = second;
+			second = reversal;
+		}
 	}
 	
 	public void pauseMovement(){
