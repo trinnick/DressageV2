@@ -18,13 +18,22 @@ public class GlobalSettings{
 	
 	private string[] file = {
 		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1.xml",
-		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest2.xml"
+		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest2.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest3.xml",
+		"http://dougstewart.biz/XMLMovementDirections/SecondLevelTest1.xml",
+		"http://dougstewart.biz/XMLMovementDirections/SecondLevelTest2.xml",
+		"http://dougstewart.biz/XMLMovementDirections/SecondLevelTest3.xml",
+		"http://dougstewart.biz/XMLMovementDirections/ThirdLevelTest1.xml",
+		"http://dougstewart.biz/XMLMovementDirections/ThirdLevelTest2.xml",
+		"http://dougstewart.biz/XMLMovementDirections/ThirdLevelTest3.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FourthLevelTest1.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FourthLevelTest2.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FourthLevelTest3.xml"
 	};
 	
 	private static string fileAddress = "";
 	
 	public GlobalSettings(){
-		fileAddress = file[0];
 	}
 	
 	/***********************Setters and Getters******************************/
@@ -98,7 +107,6 @@ public class GlobalSettings{
 	}
 	
 	public void setFileAddress(int i){
-		i -= 1;
 		fileAddress = file[i];
 	}
 	

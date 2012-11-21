@@ -5,11 +5,11 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{549FFF4F-E036-90ED-5CE2-EF3EFB2BE3CA}</ProjectGuid>
+	<ProjectGuid>{EFC966C1-D6AD-EB9F-9D7D-B6377F957BD1}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
-	<AssemblyName>Assembly-CSharp</AssemblyName>
+	<AssemblyName>Assembly-UnityScript</AssemblyName>
 	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
 	<FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -44,13 +44,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\Camera\CameraToggle.cs" />
-     <Compile Include="Assets\Scripts\GlobalSettings.cs" />
-     <Compile Include="Assets\Scripts\HorseMovement\HorseMovement.cs" />
-     <Compile Include="Assets\Scripts\HorseMovement\Movement.cs" />
-     <Compile Include="Assets\Scripts\MainMenu\ComboBox.cs" />
-     <Compile Include="Assets\Scripts\MainMenu\MainMenu.cs" />
-     <Compile Include="Assets\Scripts\MainMenu\TestSelection.cs" />
+     <Compile Include="Assets\Scripts\MainMenu\MainMenu.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
