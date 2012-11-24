@@ -6,8 +6,11 @@ public class GlobalSettings{
 	
 	private float rateOfMovement = 10.0f;
 	private int levelSelect = 1;
+	
+	private string testID = "N/A";
 	private string movementID = "N/A";
 	private String[] movementDesc = new String[0];
+	private string sequence = "N/A";
 	private string pathDesc = "N/A";
 	private bool pause = false;
 	
@@ -17,7 +20,7 @@ public class GlobalSettings{
 	private string Camera4 = "CameraEastStand";
 	
 	private string[] file = {
-		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1_circle_only.xml",
 		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest2.xml",
 		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest3.xml",
 		"http://dougstewart.biz/XMLMovementDirections/SecondLevelTest1.xml",
@@ -124,5 +127,21 @@ public class GlobalSettings{
 	
 	public void setMovementID(string id){
 		movementID = id;
+	}
+	
+	public string getSequence(){
+		return sequence;
+	}
+	
+	public void setSequence(string seq){
+		sequence = seq;
+	}
+	
+	public string getTestID(){
+		return testID;
+	}
+	
+	public void setTestID(string tID){
+		testID = tID;
 	}
 }

@@ -5,6 +5,7 @@ class Movement{
 	
 	//The following represent the method variables when extracted from the XML file for the
 	//horse's movement.
+	public string TestID;
 	public string MovementID;
 	public string MovementDesc;
 	public string Sequence;

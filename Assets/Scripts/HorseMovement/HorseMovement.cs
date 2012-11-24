@@ -1,10 +1,6 @@
-//Standard using namespace when working with Unity scripts
 using UnityEngine;
-//The namespace used when extracting nodes from xml documents
 using System.Xml;
-//The standard namespace for C# coding
 using System;
-//The standard namespace for C# coding
 using System.Collections;
 
 public class HorseMovement : MonoBehaviour {
@@ -29,14 +25,13 @@ public class HorseMovement : MonoBehaviour {
 		yield return www;
 		if (www.error == null){
 			
-			//Successfully loaded the XML
-			Debug.Log("Loaded following XML file: \n" + www.text);
-			
 			//Create new XML document from loaded data
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
 						
 			//Point to the Movement nodes and process them
+			gs.setTestID(xmlDoc.SelectSingleNode("Test/TestId").InnerText);
+			
 			yield return StartCoroutine(ProcessMovement(xmlDoc.SelectNodes("Test/Movement")));	
 		}
 		else{
@@ -69,7 +64,7 @@ public class HorseMovement : MonoBehaviour {
 				movement.PathDesc = detail.SelectSingleNode("PathDesc").InnerText;
 				movement.Gait = detail.SelectSingleNode("Gait").InnerText;
 				
-				//Set Global Variables so that this info can be accessed anywhere
+				gs.setSequence(movement.Sequence);
 				gs.setPathDesc(movement.PathDesc);
 			
 				//Call LoadMovement method and pass movement object
@@ -85,6 +80,7 @@ public class HorseMovement : MonoBehaviour {
 		Vector3 secondPosition = new Vector3();
 		Vector3 thirdPosition = new Vector3();
 		Vector3 fourthPosition = new Vector3();
+		Vector3 fifthPosition = new Vector3();
 		
 		//Split the string of path and place in array elements based on seperator character -
 		string[] path = movement.Path.Split('-');
@@ -100,9 +96,14 @@ public class HorseMovement : MonoBehaviour {
 			thirdPosition = GameObject.Find(path[2]).transform.position;
 		}
 		
-		//If there is a third element in path, assign it to the thirdPosition variable
+		//If there is a fourth element in path, assign it to the fourthPosition variable
 		if(path.Length >= 4){
 			fourthPosition = GameObject.Find(path[3]).transform.position;
+		}
+		
+		//If there is a fifth element in path, assign it to the fifthPosition variable
+		if(path.Length >= 5){
+			fifthPosition = GameObject.Find(path[4]).transform.position;
 		}
 	
 		if(movement.PathDesc == "Line" || movement.PathDesc =="Diagonal"){
@@ -120,6 +121,10 @@ public class HorseMovement : MonoBehaviour {
 			if(path.Length >= 4){
 				yield return StartCoroutine(move(thirdPosition,fourthPosition));
 			}
+			
+			if(path.Length >= 5){
+				yield return StartCoroutine(move(fourthPosition,fifthPosition));
+			}
 		}
 		else{
 			string[] desc = movement.PathDesc.Split('_');
@@ -135,20 +140,30 @@ public class HorseMovement : MonoBehaviour {
 				}
 				yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,change, path[0], path[1], float.Parse(desc[2])));
 			}
-			else if(desc[0] == "FullCircle"){
+			if(desc[0] == "FullCircle"){
 				float diameter = float.Parse(desc[2]);
 				yield return StartCoroutine(fullCircleMovement(firstPosition,diameter,path[0], desc[1]));
-			}	
+			}
+			
+			if(desc[0] == "Serpentine"){
+				yield return StartCoroutine(serpentineMovement(firstPosition,secondPosition,desc[1]));
+			}
 		}				
 	}
 
 	void OnGUI(){		
 		String movementDescFormatted = null;
+		
 		String[] movementDescUnformatted = gs.getMovementDesc();
 		for(int i=0;i<movementDescUnformatted.Length;i++){
 			movementDescFormatted += "\n" + movementDescUnformatted[i];
 		}
-		GUI.Box (new Rect (0,0,300,100), "Movement Description:\n" + movementDescFormatted);
+		
+		GUI.Box (new Rect (0,0,250,100), "Movement Description:\n" + movementDescFormatted);
+		GUI.Box (new Rect (Screen.width/2 + 0,0,100,50), "Test ID: \n" + gs.getTestID());
+		GUI.Box (new Rect (Screen.width - 100,0,100,50), "Movement ID: \n" + gs.getMovementID());
+		GUI.Box (new Rect (Screen.width - 100,55,100,50), "Sequence: \n" + gs.getSequence());
+		GUI.Box (new Rect (Screen.width - 120,110,120,50), "Path Description: \n" + gs.getPathDesc());
 	}
 	
 	IEnumerator move(Vector3 first, Vector3 second){
@@ -322,6 +337,61 @@ public class HorseMovement : MonoBehaviour {
 			Vector3 reversal = first;
 			first = second;
 			second = reversal;
+		}
+	}
+	
+	IEnumerator serpentineMovement(Vector3 first, Vector3 second, string side){
+		int change = -1;
+		int direction = 1;
+		
+		if(side == "Right"){
+			direction = -1;
+		}
+		if(side == "Left"){
+			direction = 1;
+		}
+		
+		float distance = Vector3.Distance(first,second);
+		Vector3 diameter = new Vector3(0.0f,0.0f,18.0f); //Width of arena
+		Vector3 radius =  change * (diameter/2);
+		Vector3 oneThird = new Vector3(direction * distance/3.0f,0.0f,0.0f);
+		
+		
+		Vector3 center = first + (oneThird/2);
+		Vector3 tempOne = first + radius;
+		second = first + oneThird;
+		Vector3 tempTwo = second + radius;
+		Vector3 midPoint = center + radius;
+	    float dist = (float)Math.PI * (18.0f/2.0f) * 3.0f;
+	
+		for (int x = 0; x < 3; x++){
+		    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*6) {
+		        Vector3 bp1 = Vector3.Lerp(first, tempOne, i);
+		        Vector3 bp2 = Vector3.Lerp(tempOne, midPoint, i);
+		
+		        transform.position = Vector3.Lerp(bp1, bp2, i);
+				yield return null;
+				
+				pauseMovement();
+				tg.toggle();
+		    }
+		
+		    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*6) {
+		        Vector3 bp1 = Vector3.Lerp(midPoint, tempTwo, i);
+		        Vector3 bp2 = Vector3.Lerp(tempTwo, second, i);
+		
+		        transform.position = Vector3.Lerp(bp1, bp2, i);
+				yield return null;
+				
+				pauseMovement();
+				tg.toggle();
+		    }
+			change *= -1;
+			first += oneThird;
+			tempOne += oneThird + (change * diameter);
+			midPoint += oneThird + (change * diameter);
+			tempTwo += oneThird + (change * diameter);
+			second += oneThird;
 		}
 	}
 	
