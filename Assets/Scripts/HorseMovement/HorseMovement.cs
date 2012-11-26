@@ -7,32 +7,33 @@ public class HorseMovement : MonoBehaviour {
 	
 	//Reference to the class where all variables are stored
 	public GlobalSettings gs = new GlobalSettings();
-	//Reference to the class that allows for the toggle of the camera view
-	public CameraToggle tg = new CameraToggle();
 	
 	// Use this for initialization
 	IEnumerator Start () {
-		
+		yield return StartCoroutine(LoadXML());
+	}
+	
+	//This method takes the external file selected in the GlobalSettings class
+	//and loads the XML file into temporary object
+	IEnumerator LoadXML(){
 		//Load XML data from external file (In this case from a url web address)
 		//This is collected from the Global Settings script
 		string url = gs.getFileAddress();
 		WWW www = new WWW(url);
 		
-		//Load the data and yeild (wait) till it is ready before executing
-		//Using yield it continues to perform the required task, and the return function
-		//allows for the continuation of the program script to wait until this process path
-		//is finished
+		//Wait for complete download of external file from url source above.
 		yield return www;
 		if (www.error == null){
 			
 			//Create new XML document from loaded data
 			XmlDocument xmlDoc = new XmlDocument();
 			xmlDoc.LoadXml(www.text);
-						
-			//Point to the Movement nodes and process them
-			gs.setTestID(xmlDoc.SelectSingleNode("Test/TestId").InnerText);
 			
-			yield return StartCoroutine(ProcessMovement(xmlDoc.SelectNodes("Test/Movement")));	
+			//This is important to set a yield return, since the program
+			//would continue to run normally without the yeild. What we want it
+			//to do is run the Coroutine and have the program run through the frame
+			//exectution as normal.
+			yield return StartCoroutine(ExtractMovement(xmlDoc));	
 		}
 		else{
 			
@@ -41,22 +42,24 @@ public class HorseMovement : MonoBehaviour {
 		}	
 	}
 	
-	//Converts an XmlNodeList into Movement objects
-	IEnumerator ProcessMovement(XmlNodeList nodes){
+	//This method extracts the data from the temporary XML object and places it
+	//in runtime movement object that will be processed on the spot.
+	IEnumerator ExtractMovement(XmlDocument xml){
 		Movement movement;
 		
+		gs.setTestName(xml.SelectSingleNode("Test/Name").InnerText);
+
 		//Move through each tagged item within the xml document
-		foreach (XmlNode node in nodes){
+		foreach (XmlNode node in xml.SelectNodes("Test/Movement")){
 			movement = new Movement();
-			
+
 			//Extract and assign tagged items within the xmlDoc to object variables within Movement class
 			movement.MovementID = node.SelectSingleNode("MovementId").InnerText;
 			movement.MovementDesc = node.SelectSingleNode("MovementDesc").InnerText;
 			
-			//Set Global Variables so that this information can be accessed anywhere
 			gs.setMovementID(movement.MovementID);
 			gs.setMovementDesc(movement.MovementDesc.Split('.'));
-			
+
 			//Assign MovementDetails to Movement Class variables
 			foreach (XmlNode detail in node.SelectNodes("MovementDetail")){
 				movement.Sequence = detail.SelectSingleNode("SequenceId").InnerText;
@@ -65,9 +68,10 @@ public class HorseMovement : MonoBehaviour {
 				movement.Gait = detail.SelectSingleNode("Gait").InnerText;
 				
 				gs.setSequence(movement.Sequence);
-				gs.setPathDesc(movement.PathDesc);
-			
-				//Call LoadMovement method and pass movement object
+				gs.setGait(movement.Gait);
+
+				//Call LoadMovement Coroutine method and pass movement object
+				//and wait for the finish of Coroutine to process further information.
 				yield return StartCoroutine(LoadMovement(movement));
 			}
 		}
@@ -75,95 +79,126 @@ public class HorseMovement : MonoBehaviour {
 	
 	//Process movements based on collected variable information
 	IEnumerator LoadMovement(Movement movement){
-		
+
 		Vector3 firstPosition = new Vector3();
 		Vector3 secondPosition = new Vector3();
 		Vector3 thirdPosition = new Vector3();
 		Vector3 fourthPosition = new Vector3();
 		Vector3 fifthPosition = new Vector3();
-		
+
 		//Split the string of path and place in array elements based on seperator character -
-		string[] path = movement.Path.Split('-');
-				
+		String[] path = movement.Path.Split('-');
+		String[] pathDesc = movement.PathDesc.Split('_');
+		gs.setPath(path);
+		gs.setPathDesc(pathDesc);
+		
 		//Assign the firstPosition based on the first element of the array path
 		firstPosition = GameObject.Find(path[0]).transform.position;
-		
+
 		//Assign the secondPosition based on the second elemnt of the array path
 		secondPosition = GameObject.Find(path[1]).transform.position;
-		
+
 		//If there is a third element in path, assign it to the thirdPosition variable
 		if(path.Length >= 3){
 			thirdPosition = GameObject.Find(path[2]).transform.position;
 		}
-		
+
 		//If there is a fourth element in path, assign it to the fourthPosition variable
 		if(path.Length >= 4){
 			fourthPosition = GameObject.Find(path[3]).transform.position;
 		}
-		
+
 		//If there is a fifth element in path, assign it to the fifthPosition variable
 		if(path.Length >= 5){
 			fifthPosition = GameObject.Find(path[4]).transform.position;
 		}
-	
+
 		if(movement.PathDesc == "Line" || movement.PathDesc =="Diagonal"){
-			
+
 			//Call movement based on Coroutine and yield commands
-	
+
 			if(path.Length>=2){
 				yield return StartCoroutine(move(firstPosition,secondPosition));
 			}
-			
+
 			if(path.Length >= 3){
 				yield return StartCoroutine(move(secondPosition,thirdPosition));
 			}
-			
+
 			if(path.Length >= 4){
 				yield return StartCoroutine(move(thirdPosition,fourthPosition));
 			}
-			
+
 			if(path.Length >= 5){
 				yield return StartCoroutine(move(fourthPosition,fifthPosition));
 			}
 		}
-		else{
-			string[] desc = movement.PathDesc.Split('_');
-						
-			if(desc[0] == "HalfCircle"){
-				int change = 0;
-				if(desc[3] == "Down"){
-					change = 1;
-				}
-				
-				if(desc[3] == "Up"){
-					change = -1;
-				}
-				yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,change, path[0], path[1], float.Parse(desc[2])));
+		//If it isn't a straightline path, check for the type of arcs created
+		else{						
+			if(pathDesc[0] == "HalfCircle"){
+				yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,pathDesc[3], path[0], path[1], float.Parse(pathDesc[2])));
 			}
-			if(desc[0] == "FullCircle"){
-				float diameter = float.Parse(desc[2]);
-				yield return StartCoroutine(fullCircleMovement(firstPosition,diameter,path[0], desc[1]));
+			if(pathDesc[0] == "FullCircle"){
+				float diameter = float.Parse(gs.getPathDesc()[2]);
+				yield return StartCoroutine(fullCircleMovement(firstPosition,diameter,path[0], pathDesc[1]));
 			}
 			
-			if(desc[0] == "Serpentine"){
-				yield return StartCoroutine(serpentineMovement(firstPosition,secondPosition,desc[1]));
+			if(pathDesc[0] == "Serpentine"){
+				yield return StartCoroutine(serpentineMovement(firstPosition,secondPosition,pathDesc[1]));
 			}
 		}				
 	}
 
-	void OnGUI(){		
+	void OnGUI(){				
 		String movementDescFormatted = null;
 		
 		String[] movementDescUnformatted = gs.getMovementDesc();
 		for(int i=0;i<movementDescUnformatted.Length;i++){
-			movementDescFormatted += "\n" + movementDescUnformatted[i];
+			movementDescFormatted +=  "\n" + movementDescUnformatted[i];
 		}
 		
-		GUI.Box (new Rect (0,0,250,100), "Movement Description:\n" + movementDescFormatted);
-		GUI.Box (new Rect (Screen.width/2 + 0,0,100,50), "Test ID: \n" + gs.getTestID());
-		GUI.Box (new Rect (Screen.width - 100,0,100,50), "Movement ID: \n" + gs.getMovementID());
-		GUI.Box (new Rect (Screen.width - 100,55,100,50), "Sequence: \n" + gs.getSequence());
-		GUI.Box (new Rect (Screen.width - 120,110,120,50), "Path Description: \n" + gs.getPathDesc());
+		if(gs.getHUDToggle()){
+			GUI.Box (new Rect (0,0,300,120), "Movement Description:\n" + movementDescFormatted);
+			GUI.Box (new Rect (Screen.width/2 - 75,0,150,50), "Test: \n" + gs.getTestName());
+			GUI.Box (new Rect (Screen.width - 100,0,100,50), "Movement ID: \n" + gs.getMovementID());
+			GUI.Box (new Rect (Screen.width - 100,55,100,50), "Sequence: \n" + gs.getSequence());
+			GUI.Box (new Rect (Screen.width - 150,110,150,50), "Path Description: \n" + gs.getPathDesc()[0]);
+		}
+		
+		if(gs.getPause()){
+			GUI.Box (new Rect (Screen.width/2 - 100, Screen.height/2 - 50, 200, 300), "");
+			GUI.Label (new Rect (Screen.width/2 - 30, Screen.height/2 - 40, 60, 20), "PAUSED");
+			GUI.backgroundColor = Color.green;
+			if(GUI.Button (new Rect (Screen.width/2 - 80, Screen.height/2 - 10, 75, 20), "Resume")){
+				gs.setPause(false);
+			}
+			GUI.backgroundColor = Color.red;
+			if(GUI.Button (new Rect (Screen.width/2, Screen.height/2 - 10, 75, 20), "Exit Test")){
+				Application.LoadLevel(0);
+			}
+			GUI.Label (new Rect (Screen.width/2 - 30, Screen.height/2 + 20, 60, 20), "Hotkeys");
+			GUI.Box (new Rect (Screen.width/2 - 90, Screen.height/2 + 40, 180, 100), 
+				"Spacebar = Pause\n" +
+				"Alpha 1 = 3rd Person View\n" +
+				"Alpha 2 = Top-Down View\n" +
+				"Alpha 3 = West Stand View\n" +
+				"Alpha 4 = East Stand View\n" +
+				"Down Arrow = HUD Toggle");
+		}
+	}
+	
+	void Update(){
+		CameraToggle tg = new CameraToggle();
+		
+		if(Input.GetKeyDown(KeyCode.DownArrow) && gs.getHUDToggle() == false){
+			gs.setHUDToggle(true);
+		}
+		else if(Input.GetKeyDown(KeyCode.DownArrow) && gs.getHUDToggle() == true){
+			gs.setHUDToggle(false);
+		}
+			
+		pauseMovement();	
+		tg.toggle();
 	}
 	
 	IEnumerator move(Vector3 first, Vector3 second){
@@ -171,14 +206,21 @@ public class HorseMovement : MonoBehaviour {
 	
 	    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)) {
 	        transform.position = Vector3.Lerp(first, second, i);
-			yield return null;	
-			
-			pauseMovement();
-			tg.toggle();		
+			yield return null;		
 	    }
 	}
 	
-	IEnumerator halfCircleMovement(Vector3 first, Vector3 second, int change, string markerOne, string markerTwo, float diameter){
+	IEnumerator halfCircleMovement(Vector3 first, Vector3 second, string direction, string markerOne, string markerTwo, float diameter){
+		int change = 0;
+		//Checking for whether it is up or down, we can assign direction
+		if(direction == "Down"){
+			change = 1;
+		}
+		
+		if(direction == "Up"){
+			change = -1;
+		}
+		
 		float distance = Vector3.Distance(first,second);
 		Vector3 radius =  new Vector3(change * distance,0.0f,0.0f)/2;
 		
@@ -199,9 +241,6 @@ public class HorseMovement : MonoBehaviour {
 	
 	        transform.position = Vector3.Lerp(bp1, bp2, i);
 			yield return null;
-			
-			pauseMovement();
-			tg.toggle();
 	    }
 	
 	    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*2) {
@@ -210,9 +249,6 @@ public class HorseMovement : MonoBehaviour {
 	
 	        transform.position = Vector3.Lerp(bp1, bp2, i);
 			yield return null;
-			
-			pauseMovement();
-			tg.toggle();
 	    }
 	}
 	
@@ -317,9 +353,6 @@ public class HorseMovement : MonoBehaviour {
 		
 		        transform.position = Vector3.Lerp(bp1, bp2, i);
 				yield return null;
-				
-				pauseMovement();
-				tg.toggle();
 		    }
 		
 		    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*4) {
@@ -328,9 +361,6 @@ public class HorseMovement : MonoBehaviour {
 		
 		        transform.position = Vector3.Lerp(bp1, bp2, i);
 				yield return null;
-				
-				pauseMovement();
-				tg.toggle();
 		    }
 			
 			radius *= -1;
@@ -371,9 +401,6 @@ public class HorseMovement : MonoBehaviour {
 		
 		        transform.position = Vector3.Lerp(bp1, bp2, i);
 				yield return null;
-				
-				pauseMovement();
-				tg.toggle();
 		    }
 		
 		    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)*6) {
@@ -382,9 +409,6 @@ public class HorseMovement : MonoBehaviour {
 		
 		        transform.position = Vector3.Lerp(bp1, bp2, i);
 				yield return null;
-				
-				pauseMovement();
-				tg.toggle();
 		    }
 			change *= -1;
 			first += oneThird;

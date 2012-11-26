@@ -8,11 +8,14 @@ public class MainMenu : MonoBehaviour {
 		
 	void  OnGUI (){
 		GUI.depth = 10;
-		GUI.Box (new Rect (50,50,300,150), "Start Menu");
-		GUI.Label(new Rect(70, 75, 100, 20), "Select a Test");
- 	  	if(GUI.Button( new Rect(250,100,50,20),"Start")) 
+		GUI.Box (new Rect (Screen.width/2 - 150,Screen.height/2 - 75,300,300), "");
+		GUI.Label (new Rect (Screen.width/2 - 40, Screen.height/2 - 70, 80, 20), "Start Menu");
+		GUI.Label(new Rect(Screen.width/2 -130, Screen.height/2 - 50, 100, 20), "Select a Test");
+		GUI.backgroundColor = Color.green;
+ 	  	if(GUI.Button( new Rect(Screen.width/2 + 75,Screen.height/2,50,20),"Start")) 
  	  		Application.LoadLevel(1);
- 	  	if(GUI.Button( new Rect(300,100,50,20),"Quit")) 
+		GUI.backgroundColor = Color.red;
+ 	  	if(GUI.Button( new Rect(Screen.width/2 + 75,Screen.height/2 + 25,50,20), "Quit")) 
  	  		Application.Quit();
 		
 		

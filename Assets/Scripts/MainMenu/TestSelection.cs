@@ -33,13 +33,12 @@ public class TestSelection : MonoBehaviour
 		listStyle.padding.top =
 		listStyle.padding.bottom = 4;
  
-		comboBoxControl = new ComboBox(new Rect(70, 100, 150, 20), comboBoxList[0], comboBoxList, "button", "box", listStyle);
+		comboBoxControl = new ComboBox(new Rect(Screen.width/2 -130, Screen.height/2 - 25, 150, 20), comboBoxList[0], comboBoxList, "button", "box", listStyle);
 	}
  
 	private void OnGUI () 
 	{
 		GUI.depth = 1;
 		gs.setFileAddress(comboBoxControl.Show());
-		Debug.Log(comboBoxControl.SelectedItemIndex);
 	}
 }

@@ -7,12 +7,16 @@ public class GlobalSettings{
 	private float rateOfMovement = 10.0f;
 	private int levelSelect = 1;
 	
-	private string testID = "N/A";
+	private string testName = "N/A";
 	private string movementID = "N/A";
-	private String[] movementDesc = new String[0];
+	private String[] movementDesc = {"N/A"};
+	private String[] pathDesc = {"N/A"};
 	private string sequence = "N/A";
-	private string pathDesc = "N/A";
+	private String[] path = {"N/A"};
+	private string gait = "N/A";
+	
 	private bool pause = false;
+	private bool hudToggle = true;
 	
 	private string Camera1 = "CameraHorse";
 	private string Camera2 = "CameraAbove";
@@ -20,7 +24,7 @@ public class GlobalSettings{
 	private string Camera4 = "CameraEastStand";
 	
 	private string[] file = {
-		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1_circle_only.xml",
+		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest1.xml",
 		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest2.xml",
 		"http://dougstewart.biz/XMLMovementDirections/FirstLevelTest3.xml",
 		"http://dougstewart.biz/XMLMovementDirections/SecondLevelTest1.xml",
@@ -97,11 +101,19 @@ public class GlobalSettings{
 		pause = p;
 	}
 	
-	public string getPathDesc(){
+	public bool getHUDToggle(){
+		return hudToggle;
+	}
+	
+	public void setHUDToggle(bool hud){
+		hudToggle = hud;
+	}
+	
+	public String[] getPathDesc(){
 		return pathDesc;
 	}
 	
-	public void setPathDesc(string path){
+	public void setPathDesc(String[] path){
 		pathDesc = path;
 	}
 	
@@ -137,11 +149,27 @@ public class GlobalSettings{
 		sequence = seq;
 	}
 	
-	public string getTestID(){
-		return testID;
+	public string getTestName(){
+		return testName;
 	}
 	
-	public void setTestID(string tID){
-		testID = tID;
+	public void setTestName(string tName){
+		testName = tName;
+	}
+	
+	public String[] getPath(){
+		return movementDesc;
+	}
+	
+	public void setPath(String[] p){
+		path = p;
+	}
+	
+	public string getGait(){
+		return gait;
+	}
+	
+	public void setGait(string g){
+		gait = g;
 	}
 }
