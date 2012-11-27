@@ -47,6 +47,7 @@ public class HorseMovement : MonoBehaviour {
 	IEnumerator ExtractMovement(XmlDocument xml){
 		Movement movement;
 		
+		//Set the name of the test being run in the global variable
 		gs.setTestName(xml.SelectSingleNode("Test/Name").InnerText);
 
 		//Move through each tagged item within the xml document
@@ -56,9 +57,6 @@ public class HorseMovement : MonoBehaviour {
 			//Extract and assign tagged items within the xmlDoc to object variables within Movement class
 			movement.MovementID = node.SelectSingleNode("MovementId").InnerText;
 			movement.MovementDesc = node.SelectSingleNode("MovementDesc").InnerText;
-			
-			gs.setMovementID(movement.MovementID);
-			gs.setMovementDesc(movement.MovementDesc.Split('.'));
 
 			//Assign MovementDetails to Movement Class variables
 			foreach (XmlNode detail in node.SelectNodes("MovementDetail")){
@@ -66,20 +64,19 @@ public class HorseMovement : MonoBehaviour {
 				movement.Path = detail.SelectSingleNode("Path").InnerText;
 				movement.PathDesc = detail.SelectSingleNode("PathDesc").InnerText;
 				movement.Gait = detail.SelectSingleNode("Gait").InnerText;
-				
-				gs.setSequence(movement.Sequence);
-				gs.setGait(movement.Gait);
 
 				//Call LoadMovement Coroutine method and pass movement object
 				//and wait for the finish of Coroutine to process further information.
-				yield return StartCoroutine(LoadMovement(movement));
+				yield return StartCoroutine(ProcessMovement(movement));
 			}
 		}
 	}
 	
 	//Process movements based on collected variable information
-	IEnumerator LoadMovement(Movement movement){
-
+	IEnumerator ProcessMovement(Movement movement){
+		
+		//Set temporary holders of 3D position coordinates for 
+		//extracted waypoints
 		Vector3 firstPosition = new Vector3();
 		Vector3 secondPosition = new Vector3();
 		Vector3 thirdPosition = new Vector3();
@@ -89,6 +86,12 @@ public class HorseMovement : MonoBehaviour {
 		//Split the string of path and place in array elements based on seperator character -
 		String[] path = movement.Path.Split('-');
 		String[] pathDesc = movement.PathDesc.Split('_');
+		
+		//Set global variables of movement data to be used elsewhere in the application
+		gs.setMovementID(movement.MovementID);
+		gs.setMovementDesc(movement.MovementDesc.Split('.'));		
+		gs.setSequence(movement.Sequence);
+		gs.setGait(movement.Gait);
 		gs.setPath(path);
 		gs.setPathDesc(pathDesc);
 		
@@ -96,6 +99,10 @@ public class HorseMovement : MonoBehaviour {
 		firstPosition = GameObject.Find(path[0]).transform.position;
 
 		//Assign the secondPosition based on the second elemnt of the array path
+		//The GameObject.Find function allows for you to find any game object
+		//created in the GUI game editor based on it's name (this was extracted
+		//from the path at array index of 1 when having split it from the original
+		//string earlier
 		secondPosition = GameObject.Find(path[1]).transform.position;
 
 		//If there is a third element in path, assign it to the thirdPosition variable
@@ -118,33 +125,32 @@ public class HorseMovement : MonoBehaviour {
 			//Call movement based on Coroutine and yield commands
 
 			if(path.Length>=2){
-				yield return StartCoroutine(move(firstPosition,secondPosition));
+				yield return StartCoroutine(StraigtMovement(firstPosition,secondPosition));
 			}
 
 			if(path.Length >= 3){
-				yield return StartCoroutine(move(secondPosition,thirdPosition));
+				yield return StartCoroutine(StraigtMovement(secondPosition,thirdPosition));
 			}
 
 			if(path.Length >= 4){
-				yield return StartCoroutine(move(thirdPosition,fourthPosition));
+				yield return StartCoroutine(StraigtMovement(thirdPosition,fourthPosition));
 			}
 
 			if(path.Length >= 5){
-				yield return StartCoroutine(move(fourthPosition,fifthPosition));
+				yield return StartCoroutine(StraigtMovement(fourthPosition,fifthPosition));
 			}
 		}
 		//If it isn't a straightline path, check for the type of arcs created
 		else{						
 			if(pathDesc[0] == "HalfCircle"){
-				yield return StartCoroutine(halfCircleMovement(firstPosition,secondPosition,pathDesc[3], path[0], path[1], float.Parse(pathDesc[2])));
+				yield return StartCoroutine(HalfCircleMovement(firstPosition,secondPosition,pathDesc[3], path[0], path[1], float.Parse(pathDesc[2])));
 			}
 			if(pathDesc[0] == "FullCircle"){
 				float diameter = float.Parse(gs.getPathDesc()[2]);
-				yield return StartCoroutine(fullCircleMovement(firstPosition,diameter,path[0], pathDesc[1]));
+				yield return StartCoroutine(FullCircleMovement(firstPosition,diameter,path[0], pathDesc[1]));
 			}
-			
 			if(pathDesc[0] == "Serpentine"){
-				yield return StartCoroutine(serpentineMovement(firstPosition,secondPosition,pathDesc[1]));
+				yield return StartCoroutine(SerpentineMovement(firstPosition,secondPosition,pathDesc[1]));
 			}
 		}				
 	}
@@ -190,6 +196,8 @@ public class HorseMovement : MonoBehaviour {
 	void Update(){
 		CameraToggle tg = new CameraToggle();
 		
+		//This was put here, because the system doesn't listen for
+		//input from the OnGUI method
 		if(Input.GetKeyDown(KeyCode.DownArrow) && gs.getHUDToggle() == false){
 			gs.setHUDToggle(true);
 		}
@@ -201,7 +209,7 @@ public class HorseMovement : MonoBehaviour {
 		tg.toggle();
 	}
 	
-	IEnumerator move(Vector3 first, Vector3 second){
+	IEnumerator StraigtMovement(Vector3 first, Vector3 second){
 	    float dist = Vector3.Distance(first, second);
 	
 	    for (float i = 0.0f; i < 1.0f; i += ((gs.getRateOfMovement() * Time.deltaTime)/dist)) {
@@ -210,7 +218,7 @@ public class HorseMovement : MonoBehaviour {
 	    }
 	}
 	
-	IEnumerator halfCircleMovement(Vector3 first, Vector3 second, string direction, string markerOne, string markerTwo, float diameter){
+	IEnumerator HalfCircleMovement(Vector3 first, Vector3 second, string direction, string markerOne, string markerTwo, float diameter){
 		int change = 0;
 		//Checking for whether it is up or down, we can assign direction
 		if(direction == "Down"){
@@ -252,7 +260,7 @@ public class HorseMovement : MonoBehaviour {
 	    }
 	}
 	
-	IEnumerator fullCircleMovement(Vector3 first, float diameter, string marker, string circleDirection){
+	IEnumerator FullCircleMovement(Vector3 first, float diameter, string marker, string circleDirection){
 		int circleDir = 0;
 		if(diameter == 20){
 			diameter = 18;
@@ -370,7 +378,7 @@ public class HorseMovement : MonoBehaviour {
 		}
 	}
 	
-	IEnumerator serpentineMovement(Vector3 first, Vector3 second, string side){
+	IEnumerator SerpentineMovement(Vector3 first, Vector3 second, string side){
 		int change = -1;
 		int direction = 1;
 		
